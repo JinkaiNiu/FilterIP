@@ -8,6 +8,8 @@ on:
 jobs:
   run-script:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout repository
@@ -31,11 +33,14 @@ jobs:
 
     - name: Commit changes
       run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
+        git config user.name "JinkaiNiu"
+        git config user.email "niujinkai@vip.qq.com"
         git commit -m "Update all_cn.txt" || true
 
     - name: Push changes
-      uses: ad-m/github-push-action@master
+      uses: JinkaiNiu/ActionsTask@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
