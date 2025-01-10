@@ -22,7 +22,9 @@ jobs:
       if: hashFiles('**/requirements.txt') > 0
       run: |
         python -m pip install --upgrade pip
+        pip list  # 调试步骤：列出已安装的包
         pip install -r requirements.txt
+        pip list  # 调试步骤：再次列出已安装的包以确认 requests 已安装
 
     - name: Run script
       run: python filter_ipv4_for_country.py
