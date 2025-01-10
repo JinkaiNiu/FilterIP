@@ -54,6 +54,7 @@ else:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
+        # Check for changes in all_cn.txt and commit if there are any.
         if git diff --quiet all_cn.txt; then
           echo "No changes detected."
         else
@@ -61,5 +62,5 @@ else:
           git commit -m "Update all_cn.txt with CN IPv4 addresses" || echo "No changes to commit"
           git push origin HEAD
         fi
-      env:
+      env:  # Ensure this is aligned properly with the 'run:' keyword above.
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
