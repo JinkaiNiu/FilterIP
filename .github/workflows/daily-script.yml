@@ -2,7 +2,7 @@ name: Daily Script Execution
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天午夜 UTC 运行
+    - cron: '0 2 * * *' # 每天午夜 UTC 运行
 
 jobs:
   run-script:
