@@ -2,7 +2,8 @@ name: Daily Script Execution
 
 on:
   schedule:
-    - cron: '0 2 * * *' # 每天午夜 UTC 运行
+    - cron: '0 2 * * *' # 每天凌晨两点 UTC 运行
+  workflow_dispatch: # 手动触发
 
 jobs:
   run-script:
@@ -25,6 +26,3 @@ jobs:
 
     - name: Run script
       run: python filter_ipv4_for_country.py
-
-
-
