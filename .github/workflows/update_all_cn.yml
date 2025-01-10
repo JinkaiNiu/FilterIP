@@ -1,0 +1,65 @@
+name: Update all_cn.txt
+
+# 触发条件：可以通过推送、拉取请求或者定时任务触发
+on:
+  # 允许通过推送或创建标签触发
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  # 每天凌晨1点执行一次
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # 使用最新版本的Python 3
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests  # 如果需要额外的Python库，请在这里添加
+
+    - name: Generate all_cn.txt
+      run: |
+        python -c "
+import requests
+
+url = 'https://ftp.apnic.net/stats/apnic/delegated-apnic-latest'
+response = requests.get(url)
+if response.status_code == 200:
+    with open('all_cn.txt', 'w') as file:
+        for line in response.text.splitlines():
+            if line.startswith('#') or not line.strip():
+                continue
+            ip_address = line.strip()
+            file.write(ip_address + '\n')
+else:
+    print('Failed to download the IP list.')
+"
+
+    - name: Commit and push all_cn.txt
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        if git diff --quiet all_cn.txt; then
+          echo "No changes detected."
+        else
+          git add all_cn.txt
+          git commit -m "Update all_cn.txt with CN IPv4 addresses" || echo "No changes to commit"
+          git push origin HEAD
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
