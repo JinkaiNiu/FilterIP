@@ -38,7 +38,7 @@ jobs:
         git commit -m "Update all_cn.txt" || true
 
     - name: Push changes
-      uses: JinkaiNiu/ActionsTask@main
+      uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
