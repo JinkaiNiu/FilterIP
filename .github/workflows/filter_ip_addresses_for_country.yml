@@ -1,0 +1,61 @@
+name: Filter IP Addresses for Country
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # 每天下午六点 UTC 运行，对应中国时间每天凌晨两点
+  workflow_dispatch: # 手动触发
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        echo "Upgrading pip..."
+        python -m pip install --upgrade pip
+        echo "Installing requests library..."
+        pip install requests
+
+    - name: Run script
+      run: |
+        echo "Running the filtering script..."
+        python filter_iplist_for_country.py
+
+    - name: Check if changes are present
+      id: check_changes
+      run: |
+        echo "Checking for changes in the repository..."
+        git diff-index --quiet HEAD || echo "::set-output name=changed::true"
+      shell: bash
+
+    - name: Commit and push changes
+      if: steps.check_changes.outputs.changed == 'true'
+      run: |
+        echo "Adding new files to staging area..."
+        git add all_cn.txt all_cn_ipv6.txt
+        echo "Configuring Git user information..."
+        git config user.name "JinkaiNiu"
+        git config user.email "niujinkai@vip.qq.com"
+        echo "Committing changes..."
+        git commit -m "Update IP lists"
+        echo "Pushing changes to repository..."
+        git push origin ${{ github.ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Log completion
+      run: echo "Workflow completed successfully."
+
+
+
