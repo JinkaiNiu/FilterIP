@@ -36,14 +36,17 @@ jobs:
       id: check_changes
       run: |
         echo "Checking for changes in the repository..."
-        git diff-index --quiet HEAD || echo "::set-output name=changed::true"
+        git status
+        if [[ $(git diff-index --quiet HEAD || echo "modified") == "modified" ]]; then
+          echo "::set-output name=changed::true"
+        fi
       shell: bash
 
     - name: Commit and push changes
       if: steps.check_changes.outputs.changed == 'true'
       run: |
         echo "Adding new files to staging area..."
-        git add all_cn.txt all_cn_ipv6.txt
+        git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "Configuring Git user information..."
         git config user.name "JinkaiNiu"
         git config user.email "niujinkai@vip.qq.com"
@@ -56,6 +59,3 @@ jobs:
 
     - name: Log completion
       run: echo "Workflow completed successfully."
-
-
-
