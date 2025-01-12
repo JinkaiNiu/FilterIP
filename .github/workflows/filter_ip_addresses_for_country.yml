@@ -38,12 +38,12 @@ jobs:
         echo "Checking for changes in the repository..."
         git status
         if [[ $(git diff-index --quiet HEAD || echo "modified") == "modified" ]]; then
-          echo "::set-output name=changed::true"
+          echo "changed=true" >> $GITHUB_ENV
         fi
       shell: bash
 
     - name: Commit and push changes
-      if: steps.check_changes.outputs.changed == 'true'
+      if: env.changed == 'true'
       run: |
         echo "Adding new files to staging area..."
         git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
