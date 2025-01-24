@@ -12,13 +12,16 @@ jobs:
       contents: write
 
     steps:
+    - name: Enable debug logging
+      run: echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+
     - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.10'
 
     - name: Cache Python dependencies
       uses: actions/cache@v3
@@ -30,23 +33,24 @@ jobs:
 
     - name: Install dependencies
       run: |
-        set -e
+        set -x  # 打开详细日志输出
         echo "Upgrading pip..."
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip 2>&1 | tee pip_upgrade.log
         echo "Installing requests library..."
-        pip install requests
+        pip install requests 2>&1 | tee pip_install.log
 
     - name: Run script
       run: |
-        set -e
+        set -x
         echo "Running the filtering script..."
-        python filter_iplist_for_country.py
+        python filter_iplist_for_country.py 2>&1 | tee script_output.log
 
     - name: Check if changes are present
       id: check_changes
       run: |
-        set -e
+        set -x
         echo "Checking for changes in the repository..."
+        git status
         if git diff --quiet; then
           echo "No changes detected."
         else
@@ -57,7 +61,7 @@ jobs:
     - name: Commit and push changes
       if: env.changed == 'true'
       run: |
-        set -e
+        set -x
         echo "Adding new files to staging area..."
         git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "Configuring Git user information..."
