@@ -20,8 +20,17 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
+        set -e
         echo "Upgrading pip..."
         python -m pip install --upgrade pip
         echo "Installing requests library..."
@@ -29,15 +38,18 @@ jobs:
 
     - name: Run script
       run: |
+        set -e
         echo "Running the filtering script..."
         python filter_iplist_for_country.py
 
     - name: Check if changes are present
       id: check_changes
       run: |
+        set -e
         echo "Checking for changes in the repository..."
-        git status
-        if [[ $(git diff-index --quiet HEAD || echo "modified") == "modified" ]]; then
+        if git diff --quiet; then
+          echo "No changes detected."
+        else
           echo "changed=true" >> $GITHUB_ENV
         fi
       shell: bash
@@ -45,15 +57,16 @@ jobs:
     - name: Commit and push changes
       if: env.changed == 'true'
       run: |
+        set -e
         echo "Adding new files to staging area..."
         git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "Configuring Git user information..."
-        git config user.name "JinkaiNiu"
-        git config user.email "niujinkai@vip.qq.com"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         echo "Committing changes..."
         git commit -m "Update IP lists"
         echo "Pushing changes to repository..."
-        git push origin ${{ github.ref }}
+        git push --force origin ${{ github.ref }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
