@@ -12,59 +12,70 @@ jobs:
       contents: write
 
     steps:
-    - name: Enable debug logging
-      run: echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+    - name: 启用调试日志
+      run: |
+        echo "启用 GitHub Actions 调试日志..."
+        echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
 
-    - name: Checkout repository
+    - name: 检出代码仓库
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # 确保完整克隆以便于检查变更
 
-    - name: Set up Python
+    - name: 设置 Python 环境
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    - name: 安装依赖
       run: |
         set -x  # 打开详细日志输出
-        echo "Upgrading pip..."
+        echo "开始安装依赖..."
+        echo "升级 pip..."
         python -m pip install --upgrade pip 2>&1 | tee pip_upgrade.log
-        echo "Installing requests library..."
+        echo "安装 requests 库..."
         pip install requests 2>&1 | tee pip_install.log
+        echo "依赖安装完成。"
 
-    - name: Run script
+    - name: 运行过滤脚本
       run: |
         set -x
-        echo "Running the filtering script..."
+        echo "开始运行过滤脚本..."
         python filter_iplist_for_country.py 2>&1 | tee script_output.log
+        echo "过滤脚本运行完成。"
 
-    - name: Check if changes are present
+    - name: 检查是否有变更
       id: check_changes
       run: |
         set -x
-        echo "Checking for changes in the repository..."
+        echo "检查代码仓库是否有变更..."
         git status
         if git diff --quiet; then
-          echo "No changes detected."
+          echo "未检测到任何变更。"
+          echo "changed=false" >> $GITHUB_ENV
         else
+          echo "检测到代码仓库有变更。"
           echo "changed=true" >> $GITHUB_ENV
         fi
       shell: bash
 
-    - name: Commit and push changes
+    - name: 提交并推送变更
       if: env.changed == 'true'
       run: |
         set -x
-        echo "Adding new files to staging area..."
+        echo "准备提交并推送变更..."
+        echo "将新文件添加到暂存区..."
         git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
-        echo "Configuring Git user information..."
+        echo "配置 Git 用户信息..."
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        echo "Committing changes..."
-        git commit -m "Update IP lists"
-        echo "Pushing changes to repository..."
+        echo "创建新的提交..."
+        git commit -m "更新 IP 列表"
+        echo "推送变更到远程仓库..."
         git push --force origin ${{ github.ref }}
+        echo "变更推送成功。"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Log completion
-      run: echo "Workflow completed successfully."
+    - name: 日志完成
+      run: echo "工作流已成功完成。"
