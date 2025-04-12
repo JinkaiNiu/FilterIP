@@ -60,7 +60,7 @@ jobs:
       shell: bash
 
     - name: 提交并推送变更
-      if: env.changed == 'true'
+      if: steps.check_changes.outputs.changed == 'true'
       run: |
         set -x
         echo "准备提交并推送变更..."
