@@ -46,7 +46,6 @@ jobs:
         
 
     - name: 提交并推送变更
-      if: steps.check_changes.outputs.changed == 'true'
       run: |
         set -x
         echo "准备提交并推送变更..."
@@ -56,10 +55,10 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         echo "创建新的提交..."
-        git commit -m "更新 IP 列表"
+        git commit -m "更新 IP 列表" || echo "没有新的变更需要提交"
         echo "推送变更到远程仓库..."
-        git push origin HEAD
-        echo "变更推送成功。"
+        git push origin HEAD || echo "没有新的变更需要推送"
+        echo "操作完成。"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
