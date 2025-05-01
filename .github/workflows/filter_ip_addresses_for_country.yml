@@ -52,20 +52,20 @@ jobs:
         git status
         if git diff --quiet; then
           echo "未检测到任何变更。"
-          echo "changed=false" >> $GITHUB_ENV
+          echo "::set-output name=changed::false"
         else
           echo "检测到代码仓库有变更。"
-          echo "changed=true" >> $GITHUB_ENV
+          echo "::set-output name=changed::true"
         fi
       shell: bash
 
     - name: 提交并推送变更
-      if: env.changed == 'true'
+      if: steps.check_changes.outputs.changed == 'true'
       run: |
         set -x
         echo "准备提交并推送变更..."
-        echo "将所有变更文件添加到暂存区..."
-        git add -A
+        echo "将新文件添加到暂存区..."
+        git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "配置 Git 用户信息..."
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
