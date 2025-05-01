@@ -43,21 +43,7 @@ jobs:
         echo "开始运行过滤脚本..."
         python filter_iplist_for_country.py
         echo "过滤脚本运行完成。"
-
-    - name: 检查是否有变更
-      id: check_changes
-      run: |
-        set -x
-        echo "检查代码仓库是否有变更..."
-        git status
-        if git diff --quiet; then
-          echo "未检测到任何变更。"
-          echo "::set-output name=changed::false"
-        else
-          echo "检测到代码仓库有变更。"
-          echo "::set-output name=changed::true"
-        fi
-      shell: bash
+        
 
     - name: 提交并推送变更
       if: steps.check_changes.outputs.changed == 'true'
