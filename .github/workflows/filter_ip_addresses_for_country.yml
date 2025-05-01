@@ -64,8 +64,8 @@ jobs:
       run: |
         set -x
         echo "准备提交并推送变更..."
-        echo "将新文件添加到暂存区..."
-        git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
+        echo "将所有变更文件添加到暂存区..."
+        git add -A
         echo "配置 Git 用户信息..."
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
