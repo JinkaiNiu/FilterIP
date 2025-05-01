@@ -52,15 +52,15 @@ jobs:
         git status
         if git diff --quiet; then
           echo "未检测到任何变更。"
-          echo "::set-output name=changed::false"
+          echo "changed=false" >> $GITHUB_ENV
         else
           echo "检测到代码仓库有变更。"
-          echo "::set-output name=changed::true"
+          echo "changed=true" >> $GITHUB_ENV
         fi
       shell: bash
 
     - name: 提交并推送变更
-      if: steps.check_changes.outputs.changed == 'true'
+      if: env.changed == 'true'
       run: |
         set -x
         echo "准备提交并推送变更..."
