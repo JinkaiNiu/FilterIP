@@ -50,12 +50,14 @@ jobs:
         set -x
         echo "检查代码仓库是否有变更..."
         git status
-        if git diff --quiet; then
+        # 使用 git add -A 添加所有更改的文件
+        git add -A
+        if git diff --cached --quiet; then
           echo "未检测到任何变更。"
-          echo "::set-output name=changed::false"
+          echo "changed=false" >> $GITHUB_OUTPUT
         else
           echo "检测到代码仓库有变更。"
-          echo "::set-output name=changed::true"
+          echo "changed=true" >> $GITHUB_OUTPUT
         fi
       shell: bash
 
@@ -64,13 +66,15 @@ jobs:
       run: |
         set -x
         echo "准备提交并推送变更..."
-        echo "将新文件添加到暂存区..."
-        git add all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "配置 Git 用户信息..."
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # 获取当前时间
+        current_time=$(date '+%Y-%m-%d %H:%M:%S')
         echo "创建新的提交..."
-        git commit -m "更新 IP 列表"
+        git commit -m "更新 IP 列表 - ${current_time}"
+        
         echo "推送变更到远程仓库..."
         git push origin HEAD
         echo "变更推送成功。"
