@@ -32,16 +32,16 @@ jobs:
         set -x  # 打开详细日志输出
         echo "开始安装依赖..."
         echo "升级 pip..."
-        python -m pip install --upgrade pip 2>&1 | tee pip_upgrade.log
+        python -m pip install --upgrade pip
         echo "安装 requests 库..."
-        pip install requests 2>&1 | tee pip_install.log
+        pip install requests
         echo "依赖安装完成。"
 
     - name: 运行过滤脚本
       run: |
         set -x
         echo "开始运行过滤脚本..."
-        python filter_iplist_for_country.py 2>&1 | tee script_output.log
+        python filter_iplist_for_country.py
         echo "过滤脚本运行完成。"
 
     - name: 检查是否有变更
@@ -50,14 +50,12 @@ jobs:
         set -x
         echo "检查代码仓库是否有变更..."
         git status
-        # 使用 git add -A 添加所有更改的文件
-        git add -A
-        if git diff --cached --quiet; then
+        if git diff --quiet; then
           echo "未检测到任何变更。"
-          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "::set-output name=changed::false"
         else
           echo "检测到代码仓库有变更。"
-          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "::set-output name=changed::true"
         fi
       shell: bash
 
@@ -66,15 +64,13 @@ jobs:
       run: |
         set -x
         echo "准备提交并推送变更..."
+        # 仅添加必要的文件
+        git add -f all_cn.txt all_cn_ipv6.txt delegated-apnic-latest
         echo "配置 Git 用户信息..."
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # 获取当前时间
-        current_time=$(date '+%Y-%m-%d %H:%M:%S')
         echo "创建新的提交..."
-        git commit -m "更新 IP 列表 - ${current_time}"
-        
+        git commit -m "更新 IP 列表"
         echo "推送变更到远程仓库..."
         git push origin HEAD
         echo "变更推送成功。"
