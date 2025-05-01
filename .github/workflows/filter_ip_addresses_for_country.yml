@@ -52,10 +52,10 @@ jobs:
         git status
         if git diff --quiet; then
           echo "未检测到任何变更。"
-          echo "changed=false" >> $GITHUB_ENV
+          echo "::set-output name=changed::false"
         else
           echo "检测到代码仓库有变更。"
-          echo "changed=true" >> $GITHUB_ENV
+          echo "::set-output name=changed::true"
         fi
       shell: bash
 
@@ -72,7 +72,7 @@ jobs:
         echo "创建新的提交..."
         git commit -m "更新 IP 列表"
         echo "推送变更到远程仓库..."
-        git push --force origin ${{ github.ref }}
+        git push origin HEAD
         echo "变更推送成功。"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
